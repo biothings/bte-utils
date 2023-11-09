@@ -24,18 +24,18 @@ export enum SentryLogSeverity {
 
 export class LogEntry {
   level: string;
-  message: string;
-  code: string;
-  data: LogData;
+  code: string | null;
+  message: string | null;
+  data: LogData | null;
   constructor(
     level = "DEBUG",
-    code: string | null = null,
+    code: string | number | null = null,
     message: string = null,
     data: LogData = null,
   ) {
     this.level = level;
     this.message = message;
-    this.code = code;
+    this.code = code === null ? null : String(code);
     this.data = data;
   }
 
