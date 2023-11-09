@@ -2,7 +2,7 @@
 
 [![Test with workspace](https://github.com/biothings/bte-utils/actions/workflows/test_ws_codecov.yml/badge.svg)](https://github.com/biothings/bte-utils/actions/workflows/test_ws_codecov.yml)
 [![codecov](https://codecov.io/gh/biothings/bte-utils/branch/main/graph/badge.svg?token=I4A29PQQJK)](https://codecov.io/gh/biothings/bte-utils)
-[![ci-cd](https://github.com/biothings/bte-utils/actions/workflows/deploy.yml/badge.svg)](https://github.com/biothings/bte-utils/actions/workflows/deploy.yml)
+
 
 ## Welcome to @biothings-explorer/bte-server 👋
 
