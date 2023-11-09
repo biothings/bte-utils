@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { TrapiLog } from "./types";
-import { Telemetry } from "./sentry";
+import { Telemetry } from "./telemetry";
 
 export interface LogData {
   type?: string;
