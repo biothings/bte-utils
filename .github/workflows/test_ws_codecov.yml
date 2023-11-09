@@ -40,6 +40,6 @@ jobs:
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
-        working-directory: ./packages/@biothings-explorer/bte-utils
+        working-directory: ./packages/bte-utils
         files: ./coverage/lcov.info
         verbose: true
