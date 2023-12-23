@@ -1,17 +1,23 @@
 import * as Sentry from "@sentry/node";
 import Debug from "debug";
+import opentelemetry, { Span as OtelSpan, Context as OtelContext } from '@opentelemetry/api';
 const debug = Debug("bte:telemetry-interface");
 
 const reassurance = "This doesn't affect execution";
 
 class Span {
   span: Sentry.Span;
+  otelSpan: OtelSpan;
   constructor(data: unknown) {
     try {
       this.span = Sentry?.getCurrentHub()
         ?.getScope()
         ?.getTransaction()
         ?.startChild(data);
+
+      this.otelSpan = opentelemetry.trace.getTracer('biothings-explorer-thread').startSpan((data as any).description ?? "", undefined, Telemetry.getOtelContext());
+      // if spans should be nested, use the following line
+      //Telemetry.setOtelContext(opentelemetry.trace.setSpan(opentelemetry.context.active(), this.otelSpan));
     } catch (error) {
       debug(`Sentry span start error. ${reassurance}`);
       debug(error);
@@ -30,6 +36,8 @@ class Span {
   finish() {
     try {
       this.span?.finish();
+      this.otelSpan?.end();
+      Telemetry.removeOtelContext();
     } catch (error) {
       debug(`Sentry finish error. ${reassurance}`);
       debug(error);
@@ -38,6 +46,8 @@ class Span {
 }
 
 export class Telemetry {
+  static otelCtx: OtelContext[] = [];
+
   static startSpan(data: unknown) {
     return new Span(data);
   }
@@ -51,5 +61,14 @@ export class Telemetry {
       debug(`Sentry addBreadcrumb error. ${reassurance}`);
       debug(error);
     }
+  }
+  static setOtelContext(newCtx: OtelContext) {
+    this.otelCtx.push(newCtx);
+  }
+  static getOtelContext() {
+    return this.otelCtx.length > 0 ? this.otelCtx[this.otelCtx.length-1] : undefined;
+  }
+  static removeOtelContext() {
+    this.otelCtx.pop();
   }
 }
