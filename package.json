@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "A bundle of commonly-used utilities within other BTE modules",
   "main": "./built/index.js",
-  "types": "./built/index.js",
+  "types": "./built/index.d.ts",
   "scripts": {
     "build": "tsc -b",
     "prepare": "pnpm run build",
@@ -52,6 +52,7 @@
     }
   },
   "dependencies": {
+    "@opentelemetry/api": "^1.7.0",
     "@sentry/node": "^7.74.1",
     "debug": "^4.3.4",
     "lodash": "^4.17.21"
