@@ -4,9 +4,3 @@ export interface TrapiLog {
   message: string;
   code: string;
 }
-
-declare global {
-  var job: {
-    log: (logString: string) => void;
-  }; // TODO type as Piscina job
-}
