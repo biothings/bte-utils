@@ -49,3 +49,27 @@ export function cartesian(a: number[][]): number[][] {
   }
   return o;
 }
+
+export class TimeoutError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "TimeoutError";
+  }
+}
+
+// Do not use on the same promise multiple times
+export function timeoutPromise<T>(promise: Promise<T>, timeout: number): Promise<T> {
+  let reject = (_: any) => {};
+  let resolve = (_: T) => {};
+  const cancel = setTimeout(() => {
+    reject(new TimeoutError(`Promise exceeded timeout of ${timeout/1000} seconds.`));
+  }, timeout);
+  promise
+    .then(result => resolve(result))
+    .catch(error => reject(error))
+    .finally(() => clearTimeout(cancel));
+  return new Promise<T>((newResolve, newReject) => {
+    resolve = newResolve;
+    reject = newReject;
+  });
+}
