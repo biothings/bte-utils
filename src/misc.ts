@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 export function toArray<Type>(input: Type | Type[]): Type[] {
   if (Array.isArray(input)) {
     return input;
@@ -48,4 +50,8 @@ export function cartesian(a: number[][]): number[][] {
     }
   }
   return o;
+}
+
+export function hash(toHash: string) {
+  return crypto.createHash("md5").update(toHash).digest("hex");
 }
