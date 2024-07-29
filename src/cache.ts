@@ -2,7 +2,7 @@ import { Readable, Transform } from "stream";
 import lz4 from "lz4";
 import { redisClient } from "./redis-client";
 import Debug from "debug";
-const debug = Debug("retriever:caching");
+const debug = Debug("bte:caching");
 
 export async function cacheContent(
   hash: string,
@@ -14,11 +14,11 @@ export async function cacheContent(
   }
 
   debug(`Caching ${content.length} items for article ${hash}`);
-  const cacheID = `retriever:cacheContent:${hash}`;
+  const cacheID = `bte:cacheContent:${hash}`;
   let success = false;
 
   await redisClient.client.usingLock(
-    [`retriever:cachingLock:${hash}`],
+    [`bte:cachingLock:${hash}`],
     30000,
     async () => {
       try {
@@ -70,7 +70,7 @@ async function cacheChunk(
   chunk: string,
   reject: { (reason: any): void; (arg0: any): void },
 ) {
-  const id = `retriever:cacheContent:${hash}`;
+  const id = `bte:cacheContent:${hash}`;
   try {
     await redisClient.client.hsetTimeout(id, String(index++), chunk);
   } catch (error) {
@@ -92,11 +92,11 @@ export async function cacheLookup(hash: string): Promise<unknown[] | null> {
     return null;
   }
   debug(`Beginning cache lookup for article ${hash}`);
-  const id = `retriever:cacheContent:${hash}`;
+  const id = `bte:cacheContent:${hash}`;
 
   const content = await new Promise<any>(resolve => {
     redisClient.client.usingLock(
-      [`retriever: cachingLock:${hash} `],
+      [`bte: cachingLock:${hash} `],
       30000,
       async () => readFromCache(hash, resolve),
     );
@@ -127,7 +127,7 @@ async function readFromCache(
   hash: string,
   resolve: (value: any | null) => void,
 ): Promise<void> {
-  const id = `retriever:cacheContent:${hash}`;
+  const id = `bte:cacheContent:${hash}`;
   try {
     const compressedContent = await redisClient.client.hgetallTimeout(id);
     if (!(compressedContent && Object.keys(compressedContent).length)) {
