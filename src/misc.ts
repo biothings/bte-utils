@@ -10,7 +10,7 @@ export function getUnique<Type>(input: Type[]): Type[] {
 }
 
 export function removeBioLinkPrefix(input: string): string {
-  if (input && input.startsWith('biolink:')) {
+  if (input && input.startsWith("biolink:")) {
     return input.slice(8);
   }
   return input;
@@ -19,7 +19,10 @@ export function removeBioLinkPrefix(input: string): string {
 // This gets the intersection of two sets.
 // Lodash _.intersection gets the intersection of two arrays.
 // see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set
-export function intersection<Type>(setA: Set<Type>, setB: Set<Type>): Set<Type> {
+export function intersection<Type>(
+  setA: Set<Type>,
+  setB: Set<Type>,
+): Set<Type> {
   const resultSet: Set<Type> = new Set();
   for (const elem of setB) {
     if (setA.has(elem)) {
