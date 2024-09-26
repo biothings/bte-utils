@@ -31,6 +31,7 @@
   "devDependencies": {
     "@commitlint/cli": "^18.2.0",
     "@commitlint/config-conventional": "^11.0.0",
+    "biolink-model": "workspace:../biolink-model",
     "@types/debug": "^4.1.10",
     "@types/jest": "^29.5.7",
     "@types/lodash": "^4.14.200",
