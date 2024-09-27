@@ -52,3 +52,4 @@ export function cartesian(a: number[][]): number[][] {
   }
   return o;
 }
+
