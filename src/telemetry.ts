@@ -2,7 +2,6 @@ import * as Sentry from "@sentry/node";
 import Debug from "debug";
 import opentelemetry, {
   Span as OtelSpan,
-  Context as OtelContext,
   SpanStatusCode,
 } from "@opentelemetry/api";
 const debug = Debug("bte:telemetry-interface");
@@ -81,11 +80,13 @@ export class Telemetry {
   }
   static setOtelSpan(newOtelSpan: OtelSpan) {
     global.otelSpan = newOtelSpan;
+    debug(`OTel span created: ${JSON.stringify(newOtelSpan.spanContext().spanId)}`);
   }
   static getOtelSpan(): OtelSpan {
     return global.otelSpan;
   }
   static removeOtelSpan() {
+    debug(`OTel span removed: ${JSON.stringify(global.otelSpan.spanContext().spanId)}`);
     global.otelSpan = undefined;
   }
 }
