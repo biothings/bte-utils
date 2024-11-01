@@ -4,3 +4,4 @@ export * from "./telemetry";
 export * from "./misc";
 export * from "./redis-client";
 export * from "./biolink";
+export * from "./debug";

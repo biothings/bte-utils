@@ -1,5 +1,5 @@
 import { BioLink } from 'biolink-model';
-import Debug from 'debug';
+import { Debug } from "./debug";
 const debug = Debug('bte:biothings-explorer-trapi:EdgeReverse');
 
 class BioLinkModel {

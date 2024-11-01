@@ -1,5 +1,5 @@
 import Redis, { Cluster, RedisKey } from "ioredis";
-import Debug from "debug";
+import { Debug } from "./debug";
 const debug = Debug("bte:biothings-explorer-trapi:redis-client");
 import Redlock, { RedlockAbortSignal } from "redlock";
 
