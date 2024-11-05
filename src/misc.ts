@@ -1,5 +1,4 @@
 import lockfile from "proper-lockfile";
-import { setTimeout as sleep } from "timers/promises";
 
 export function toArray<Type>(input: Type | Type[]): Type[] {
   if (Array.isArray(input)) {
@@ -91,50 +90,27 @@ export const LOCKFILE_RETRY_CONFIG = {
   stale: LOCKFILE_STALENESS["stale"],
 };
 
-export async function lockWithActionAsync<T>(filePath: string, action: () => Promise<T>, debug?: (message: string) => void): Promise<T> {
+export async function lockWithActionAsync<T>(filePaths: string[], action: () => Promise<T>, debug?: (message: string) => void, lockfileRetryConfig?: any): Promise<T> {
   if (process.env.NODE_ENV !== "production") {
     debug(`Development mode: Skipping lockfile ${process.env.NODE_ENV}`);
     const result = await action();
     return result;
   }
 
-  let release;
+  const releases: (() => void)[] = [];
+  const retryConfig = lockfileRetryConfig || LOCKFILE_RETRY_CONFIG;
   try {
-    release = await lockfile.lock(filePath, LOCKFILE_RETRY_CONFIG);
-    const result = await action();
-    return result;
-  } catch (error) {
-    debug(`Lockfile error: ${error}`);
-    // throw error;
-  } finally {
-    if (release) release();
-  }
-}
-
-export function lockWithActionSync<T>(filePath: string, action: () => T, debug?: (message: string) => void): T {
-  if (process.env.NODE_ENV !== "production") {
-    debug(`Development mode: Skipping lockfile ${process.env.NODE_ENV}`);
-    return action();
-  }
-
-  let release;
-  try {
-    const startTime = Date.now();
-
-    while (Date.now() - startTime < LOCKFILE_STALENESS["stale"]) {
-      if (!lockfile.checkSync(filePath)) {
-        release = lockfile.lockSync(filePath, LOCKFILE_STALENESS);
-        const result = action();
-        return result;
-      } else {
-        sleep(LOCKFILE_RETRY_CONFIG["retries"]["minTimeout"]);
-      }
+    for (const filePath of filePaths) {
+      let release = await lockfile.lock(filePath, retryConfig);
+      releases.push(release);
     }
-    debug("Lockfile timeout: did not read file");
+    const result = await action();
+    return result;
   } catch (error) {
     debug(`Lockfile error: ${error}`);
     // throw error;
   } finally {
-    if (release) release();
+    for (const release of releases)
+      if (release) release();
   }
 }
