@@ -1,3 +1,5 @@
+import lockfile from "proper-lockfile";
+
 export function toArray<Type>(input: Type | Type[]): Type[] {
   if (Array.isArray(input)) {
     return input;
@@ -75,4 +77,40 @@ export function timeoutPromise<T>(promise: Promise<T>, timeout: number): Promise
     resolve = newResolve;
     reject = newReject;
   });
+}
+
+export const LOCKFILE_STALENESS = {stale: 5000}; // lock expiration in milliseconds to prevent deadlocks
+export const LOCKFILE_RETRY_CONFIG = {
+  retries: {
+    retries: 10,
+    factor: 2,
+    minTimeout: 100,
+    maxTimeout: 1000,
+  },
+  stale: LOCKFILE_STALENESS["stale"],
+};
+
+export async function lockWithActionAsync<T>(filePaths: string[], action: () => Promise<T>, debug?: (message: string) => void, lockfileRetryConfig?: any): Promise<T> {
+  if (process.env.NODE_ENV !== "production") {
+    debug(`Development mode: Skipping lockfile ${process.env.NODE_ENV}`);
+    const result = await action();
+    return result;
+  }
+
+  const releases: (() => void)[] = [];
+  const retryConfig = lockfileRetryConfig || LOCKFILE_RETRY_CONFIG;
+  try {
+    for (const filePath of filePaths) {
+      let release = await lockfile.lock(filePath, retryConfig);
+      releases.push(release);
+    }
+    const result = await action();
+    return result;
+  } catch (error) {
+    debug(`Lockfile error: ${error}`);
+    // throw error;
+  } finally {
+    for (const release of releases)
+      if (release) release();
+  }
 }
