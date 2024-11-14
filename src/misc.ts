@@ -79,10 +79,10 @@ export function timeoutPromise<T>(promise: Promise<T>, timeout: number): Promise
   });
 }
 
-export const LOCKFILE_STALENESS = {stale: 5000}; // lock expiration in milliseconds to prevent deadlocks
+export const LOCKFILE_STALENESS = {stale: 11000}; // lock expiration in milliseconds to prevent deadlocks
 export const LOCKFILE_RETRY_CONFIG = {
   retries: {
-    retries: 10,
+    retries: 12,  // 9.5 seconds max
     factor: 2,
     minTimeout: 100,
     maxTimeout: 1000,
@@ -108,9 +108,14 @@ export async function lockWithActionAsync<T>(filePaths: string[], action: () => 
     return result;
   } catch (error) {
     debug(`Lockfile error: ${error}`);
-    // throw error;
+    throw error;
   } finally {
-    for (const release of releases)
-      if (release) release();
+    for (const release of releases) {
+      try {
+        if (release) release();
+      } catch (error) {
+        debug(`Lockfile release error: ${error}`);
+      }
+    }
   }
 }
