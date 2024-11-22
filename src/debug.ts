@@ -1,38 +1,19 @@
 import debug, { Debugger } from 'debug';
-import async_hooks from 'async_hooks';
+import { AsyncLocalStorage } from 'node:async_hooks';
 
 const debugInstances: {[namespace: string]: {[postfix: string]: Debugger}} = {};
-const asyncContext = new Map();
-
-// any child async calls/promises will inherit the asyncContex from their parent (triggerAsyncId)
-async_hooks.createHook({
-  init(asyncId, type, triggerAsyncId, resource) {
-    if (asyncContext.has(triggerAsyncId)) {
-      asyncContext.set(asyncId, asyncContext.get(triggerAsyncId));
-    }
-  },
-  destroy(asyncId) {
-    asyncContext.delete(asyncId);
-  }
-}).enable();
+const asyncLocalStorage = new AsyncLocalStorage<{postfix: string}>();
 
 export function withDebugContext<F extends (...args: any[]) => any>(postfix: string, fn: F) {
   return async (...args: Parameters<F>): Promise<Awaited<ReturnType<F>>> => {
-    // associates the promise created by this function with the postfix to be added to the debug namespace
-    const asyncId = async_hooks.executionAsyncId();
-    asyncContext.set(asyncId, postfix);
-
-    try {
-      return await fn(...args);
-    } finally {
-      asyncContext.delete(asyncId);
-    }
+    return await asyncLocalStorage.run({ postfix }, () => {
+      return fn(...args);
+    })
   };
 }
 
 function getContext() {
-    const asyncId = async_hooks.executionAsyncId();
-    return asyncContext.get(asyncId);
+  return asyncLocalStorage.getStore()?.postfix;
 }
 
 export function Debug(namespace: string) {
