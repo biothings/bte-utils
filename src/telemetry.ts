@@ -1,5 +1,5 @@
 import * as Sentry from "@sentry/node";
-import Debug from "debug";
+import { Debug } from "./debug";
 import opentelemetry, {
   Span as OtelSpan,
   SpanStatusCode,
